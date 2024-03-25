@@ -1,16 +1,17 @@
 const express = require('express');
-
 const router = express.Router();
+const { getBooks, addBook } = require('../controllers/book.controller');
+const auth = require('../middlewares/auth');
 
-router.get('/');
+router.get('/', getBooks);
 router.get('/:id');
 router.get('/:id/bestrating');
 
-router.post('/');
-router.post('/:id/rating');
+router.post('/', auth, addBook);
+router.post('/:id/rating', auth);
 
-router.put('/:id');
+router.put('/:id', auth);
 
-router.delete('/:id');
+router.delete('/:id', auth);
 
 module.exports = router;
