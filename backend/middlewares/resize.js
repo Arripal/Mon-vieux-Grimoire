@@ -1,12 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
+
 module.exports = async (req, res, next) => {
-	!req.file && next();
+	if (!req.file) {
+		return next();
+	}
 
 	const filePath = req.file.path;
 	const fileName = req.file.filename;
-	const newFilePath = path.join('./images', `updated_${fileName}`);
+	const newFilePath = path.join('images', `updated_${fileName}`);
 
 	try {
 		sharp.cache(false);
@@ -16,9 +19,9 @@ module.exports = async (req, res, next) => {
 			.then(() => {
 				fs.unlink(filePath, (error) => {
 					if (error) {
-						console.log(error);
 						throw error;
 					}
+
 					req.file.path = newFilePath;
 					next();
 				});

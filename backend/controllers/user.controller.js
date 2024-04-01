@@ -1,6 +1,8 @@
-const User = require('../models/User.model');
-const jwt = require('jsonwebtoken');
+const db = require('../db/database');
+const { User } = db;
 const { compare, hash } = require('../utils/password');
+const SECRET_JWT_KEY = process.env.SECRET_JWT_KEY;
+const jwt = require('jsonwebtoken');
 
 exports.login = async (req, res) => {
 	const { email, password } = req.body;
@@ -29,10 +31,12 @@ exports.login = async (req, res) => {
 
 		res.status(201).json({
 			userId: user._id,
-			token: jwt.sign({ userId: user._id }, 'AUTH_TOKEN', { expiresIn: '10h' }),
+			token: jwt.sign({ userId: user._id }, SECRET_JWT_KEY, {
+				expiresIn: '10h',
+			}),
 		});
 	} catch (error) {
-		return res.status(403).json({ error });
+		return res.status(500).json({ error });
 	}
 };
 
