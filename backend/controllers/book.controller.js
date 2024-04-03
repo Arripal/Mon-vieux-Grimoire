@@ -23,19 +23,21 @@ exports.getOneBook = async (req, res) => {
 	}
 };
 
-exports.getBestRating = async (req, res) => {
+exports.getBestRatings = async (req, res) => {
 	try {
-		const books = await Book.find();
+		const books = await Book.find().sort({ averageRating: -1 }).limit(3);
 
 		res.status(200).json(books);
 	} catch (error) {
-		res.status(400).json({ error });
+		console.log('une erreur est survenue.');
+		res.status(401).json({ error });
 	}
 };
 
 exports.addBook = async (req, res) => {
 	const bookData = JSON.parse(req.body.book);
 	const { userId } = req.auth;
+
 	delete bookData._id;
 	delete bookData.userId;
 
@@ -115,6 +117,7 @@ exports.updateBook = async (req, res, next) => {
 					}`,
 			  }
 			: { ...req.body };
+
 		//Supression d'un potentiel faux
 		delete bookData.userId;
 

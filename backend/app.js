@@ -11,7 +11,6 @@ const usersRoutes = require('./routes/users');
 //OWASP  brute force attaque => librairie  mongodb atlas => admin / autres users
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use('/images', express.static('images'));
 app.use(cors());
 app.use('/api/books', booksRoutes);

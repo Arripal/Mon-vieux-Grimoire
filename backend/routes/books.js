@@ -5,7 +5,7 @@ const multer = require('../middlewares/multer');
 const resize = require('../middlewares/resize');
 const {
 	getBooks,
-	getBestRating,
+	getBestRatings,
 	getOneBook,
 	addBook,
 	addRating,
@@ -14,8 +14,8 @@ const {
 } = require('../controllers/book.controller');
 
 router.get('/', getBooks);
+router.get('/bestrating', getBestRatings);
 router.get('/:id', getOneBook);
-router.get('/bestrating', getBestRating);
 
 router.post('/', auth, multer, resize, addBook);
 router.post('/:id/rating', auth, addRating);
