@@ -1,7 +1,5 @@
 const multer = require('multer');
 
-//Corriger les noms images
-
 const MIME_TYPES = {
 	'image/jpg': 'jpg',
 	'image/jpeg': 'jpg',
@@ -21,4 +19,8 @@ const storage = multer.diskStorage({
 	},
 });
 
-module.exports = multer({ storage }).single('image');
+module.exports = multer({
+	storage,
+	//Limitation de la taille maximale du fichier, ici 8 Mo
+	limits: { fileSize: 8 * 1024 * 1024 },
+}).single('image');

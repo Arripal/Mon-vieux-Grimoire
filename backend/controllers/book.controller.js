@@ -1,8 +1,7 @@
-const db = require('../db/database');
-const { Book } = db;
+const Book = require('../models/Book.model');
 const fs = require('fs');
 
-//RAJOUTER DES COMMENTAIRES
+//Rajouter commentaire lors de la déclaration des fonctions
 
 exports.getBooks = async (req, res) => {
 	try {
@@ -15,8 +14,13 @@ exports.getBooks = async (req, res) => {
 
 exports.getOneBook = async (req, res) => {
 	const { id } = req.params;
+
 	try {
 		const book = await Book.findOne({ _id: id });
+
+		if (!book)
+			return res.status(404).json({ message: "Ce livre n'existe pas." });
+
 		res.status(200).json(book);
 	} catch (error) {
 		res.status(400).json({ error });
@@ -25,19 +29,21 @@ exports.getOneBook = async (req, res) => {
 
 exports.getBestRatings = async (req, res) => {
 	try {
+		// tri décroissant en utilisant la méthode sort de MongoDb
 		const books = await Book.find().sort({ averageRating: -1 }).limit(3);
 
 		res.status(200).json(books);
 	} catch (error) {
-		console.log('une erreur est survenue.');
 		res.status(401).json({ error });
 	}
 };
 
 exports.addBook = async (req, res) => {
+	//Traitement des données provenant du form-data
 	const bookData = JSON.parse(req.body.book);
-	const { userId } = req.auth;
 
+	const { userId } = req.auth;
+	// A vérifier  en faisant des tests
 	delete bookData._id;
 	delete bookData.userId;
 
@@ -61,20 +67,20 @@ exports.addRating = async (req, res) => {
 	const { rating } = req.body;
 	const { id } = req.params;
 	const { userId } = req.auth;
-	delete req.body._id;
+
 	try {
 		const book = await Book.findOne({ _id: id });
 		const ratings = book.ratings;
 
 		const existingRating = ratings.filter((rating) => rating.userId === userId);
 
-		if (!book || existingRating.length > 0)
+		const validRatings = [0, 1, 2, 3, 4, 5];
+		const isValidRating = validRatings.includes(rating);
+
+		if (!book || existingRating.length > 0 || !isValidRating)
 			return res
 				.status(403)
 				.json({ message: "Impossible d'ajouter votre note." });
-
-		const validRatings = [0, 1, 2, 3, 4, 5];
-		const isValidRating = validRatings.includes(rating);
 
 		const newRating = isValidRating && {
 			grade: rating,
@@ -89,6 +95,7 @@ exports.addRating = async (req, res) => {
 		const avgRating = sumRating / ratings.length;
 
 		book.averageRating = avgRating;
+
 		await book.save();
 
 		res.status(201).json(book);
@@ -109,6 +116,8 @@ exports.updateBook = async (req, res, next) => {
 				.status(403)
 				.json({ message: 'Impossible de modifier ce livre.' });
 
+		//Données  arrivant soit depuis un form-data soit sous format JSON s'il n'y a pas de fichier image
+
 		const bookData = req.file
 			? {
 					...JSON.parse(req.body.book),
@@ -118,8 +127,7 @@ exports.updateBook = async (req, res, next) => {
 			  }
 			: { ...req.body };
 
-		//Supression d'un potentiel faux
-		delete bookData.userId;
+		//Si req.file , récupération du nom de l'image et suppression de cette dernière
 
 		const filename = existingBook.imageUrl.split('/images/')[1];
 

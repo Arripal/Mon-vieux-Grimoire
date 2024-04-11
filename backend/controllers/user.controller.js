@@ -1,5 +1,4 @@
-const db = require('../db/database');
-const { User } = db;
+const User = require('../models/User.model');
 const { compare, hash } = require('../utils/password');
 const SECRET_JWT_KEY = process.env.SECRET_JWT_KEY;
 const jwt = require('jsonwebtoken');
