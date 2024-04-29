@@ -12,6 +12,7 @@ module.exports = async (req, res, next) => {
 	const newFilePath = path.join('images', `updated_${fileName}`);
 
 	try {
+		//
 		sharp.cache(false);
 		sharp(filePath)
 			.resize({ width: 206, height: 260 })

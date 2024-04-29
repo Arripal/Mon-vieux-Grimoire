@@ -1,7 +1,5 @@
-const Book = require('../models/Book.model');
+const Book = require('../db/models/Book.model');
 const fs = require('fs');
-
-//Rajouter commentaire lors de la déclaration des fonctions
 
 exports.getBooks = async (req, res) => {
 	try {
@@ -43,8 +41,7 @@ exports.addBook = async (req, res) => {
 	const bookData = JSON.parse(req.body.book);
 
 	const { userId } = req.auth;
-	// A vérifier  en faisant des tests
-	delete bookData._id;
+
 	delete bookData.userId;
 
 	const book = new Book({
@@ -82,7 +79,7 @@ exports.addRating = async (req, res) => {
 				.status(403)
 				.json({ message: "Impossible d'ajouter votre note." });
 
-		const newRating = isValidRating && {
+		const newRating = {
 			grade: rating,
 			userId: userId,
 			_id: id,
@@ -104,7 +101,7 @@ exports.addRating = async (req, res) => {
 	}
 };
 
-exports.updateBook = async (req, res, next) => {
+exports.updateBook = async (req, res) => {
 	const { id } = req.params;
 	const { userId } = req.auth;
 
@@ -127,7 +124,7 @@ exports.updateBook = async (req, res, next) => {
 			  }
 			: { ...req.body };
 
-		//Si req.file , récupération du nom de l'image et suppression de cette dernière
+		//Si req.file , récupération de l'image existante et suppression de cette dernière
 
 		const filename = existingBook.imageUrl.split('/images/')[1];
 
@@ -149,15 +146,15 @@ exports.deleteBook = async (req, res) => {
 	const { userId } = req.auth;
 
 	try {
-		const book = await Book.findOne({ _id: id });
+		//Suppression du livre dans la base de données
+		const book = await Book.findOneAndDelete({ _id: id, userId: userId });
 
-		if (!book || book.userId !== userId)
+		if (!book)
 			return res
 				.status(403)
 				.json({ message: 'Impossible de supprimer ce livre.' });
 
-		await Book.deleteOne({ _id: id });
-
+		//Supression de l'image dans le dossier images
 		const filename = book.imageUrl.split('/images/')[1];
 
 		fs.unlink(`images/${filename}`, (error) => {
