@@ -1,29 +1,19 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const helmet = require('helmet');
 require('dotenv').config();
 const db = require('./db/database');
-
-const PORT = process.env.PORT || 4200;
+const PORT = process.env.PORT || 4000;
 
 const booksRoutes = require('./routes/books');
 const usersRoutes = require('./routes/users');
 
-app.use(express.json());
-/*
-app.use((req, res, next) => {
-	res.setHeader('Access-Control-Allow-Origin', '*');
-	res.setHeader(
-		'Access-Control-Allow-Headers',
-		'Origin,X-Requested-With,Content,Accept,Content-Type,Authorization'
-	);
-	res.setHeader(
-		'Access-Control-Allow-Methods',
-		'GET,POST,PUT,DELETE,PATCH,OPTIONS'
-	);
-	next();
-});
-*/
+// Ajout d'Helmet afin de sécurisé l'application en ajoutant des headers HTTP
+app.use(helmet({ crossOriginResourcePolicy: false }));
+//Limitation de la taille des requetes JSON pour ne pas surcharger le serveur
+app.use(express.json({ limit: '10mb' }));
+app.use('/images', express.static('images'));
 app.use(cors());
 app.use('/api/books', booksRoutes);
 app.use('/api/auth', usersRoutes);
